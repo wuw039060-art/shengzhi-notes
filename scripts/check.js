@@ -71,7 +71,7 @@ for (const [label, source] of guideControls) {
   }
 }
 
-const releaseAssetName = `声织笔记 Setup ${packageJson.version}.exe`;
+const releaseAssetName = `Setup.${packageJson.version}.exe`;
 const expectedReleaseUrl = `https://github.com/wuw039060-art/shengzhi-notes/releases/download/v${packageJson.version}/${encodeURIComponent(releaseAssetName)}`;
 if (!readme.includes(expectedReleaseUrl)) {
   console.error(`README must provide the direct installer URL for v${packageJson.version}.`);

@@ -26,7 +26,7 @@
 
 ## 下载与安装
 
-[下载 Windows 安装包 v0.2.17](https://github.com/wuw039060-art/shengzhi-notes/releases/download/v0.2.17/%E5%A3%B0%E7%BB%87%E7%AC%94%E8%AE%B0%20Setup%200.2.17.exe)
+[下载 Windows 安装包 v0.2.17](https://github.com/wuw039060-art/shengzhi-notes/releases/download/v0.2.17/Setup.0.2.17.exe)
 
 - 适用系统：Windows 10 / Windows 11 x64。
 - 安装包已经内置 FFmpeg 和 FFprobe，不需要另外安装 Node.js、Python、FFmpeg 或本地模型。
