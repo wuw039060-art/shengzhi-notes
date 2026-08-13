@@ -5,6 +5,7 @@ const releaseMode = process.argv.includes("--release");
 
 const requiredFiles = [
   "package.json",
+  "README.md",
   "src/main/main.js",
   "src/main/preload.js",
   "src/main/services/api-fetch.js",
@@ -41,6 +42,7 @@ for (const file of requiredBinaries) {
 }
 
 const packageJson = JSON.parse(fs.readFileSync(path.join(process.cwd(), "package.json"), "utf8"));
+const readme = fs.readFileSync(path.join(process.cwd(), "README.md"), "utf8");
 const rendererHtml = fs.readFileSync(path.join(process.cwd(), "src/renderer/index.html"), "utf8");
 const rendererCss = fs.readFileSync(path.join(process.cwd(), "src/renderer/styles.css"), "utf8");
 const rendererJs = fs.readFileSync(path.join(process.cwd(), "src/renderer/renderer.js"), "utf8");
@@ -48,6 +50,43 @@ const mainJs = fs.readFileSync(path.join(process.cwd(), "src/main/main.js"), "ut
 const preloadJs = fs.readFileSync(path.join(process.cwd(), "src/main/preload.js"), "utf8");
 const jobRunnerJs = fs.readFileSync(path.join(process.cwd(), "src/main/services/job-runner.js"), "utf8");
 const mediaServiceJs = fs.readFileSync(path.join(process.cwd(), "src/main/services/media-service.js"), "utf8");
+
+const guideControls = [
+  ["连接设置", rendererHtml],
+  ["语音识别 ASR", rendererHtml],
+  ["文本排版模型", rendererHtml],
+  ["添加文件", rendererHtml],
+  ["2. 选择渲染方式", rendererHtml],
+  ["3. 开始转录", rendererHtml],
+  ["暂停", rendererHtml],
+  ["继续转录", rendererJs],
+  ["输出预览", rendererHtml],
+  ["保存 Markdown", rendererHtml],
+  ["处理日志", rendererHtml]
+];
+for (const [label, source] of guideControls) {
+  if (!readme.includes(label) || !source.includes(label)) {
+    console.error(`README guide and application UI must both contain: ${label}`);
+    ok = false;
+  }
+}
+
+const releaseAssetName = `声织笔记 Setup ${packageJson.version}.exe`;
+const expectedReleaseUrl = `https://github.com/wuw039060-art/shengzhi-notes/releases/download/v${packageJson.version}/${encodeURIComponent(releaseAssetName)}`;
+if (!readme.includes(expectedReleaseUrl)) {
+  console.error(`README must provide the direct installer URL for v${packageJson.version}.`);
+  ok = false;
+}
+if (!readme.includes("取消当前处理并暂停队列") || !rendererJs.includes("cancelJob(task.id)")) {
+  console.error("README pause behavior must match the application's cancel-and-restart behavior.");
+  ok = false;
+}
+for (const internalDoc of ["GITHUB_SUBMISSION.md", "LAUNCH_KIT.md", "RELEASE_TEMPLATE.md", "OBSIDIAN_WORKFLOW.md"]) {
+  if (readme.includes(internalDoc)) {
+    console.error(`README must not expose internal presentation material: ${internalDoc}`);
+    ok = false;
+  }
+}
 const requiredRendererIds = [
   "startJob",
   "pauseJob",
@@ -190,4 +229,4 @@ for (const file of requiredFiles.filter((name) => name.endsWith(".js"))) {
 }
 
 if (!ok) process.exit(1);
-console.log("Project structure and JavaScript modules look OK.");
+console.log("Project structure, JavaScript modules, and README usage guide look OK.");

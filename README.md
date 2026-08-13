@@ -24,6 +24,37 @@
 
 当前版本：`v0.2.17`
 
+## 下载与安装
+
+[下载 Windows 安装包 v0.2.17](https://github.com/wuw039060-art/shengzhi-notes/releases/download/v0.2.17/%E5%A3%B0%E7%BB%87%E7%AC%94%E8%AE%B0%20Setup%200.2.17.exe)
+
+- 适用系统：Windows 10 / Windows 11 x64。
+- 安装包已经内置 FFmpeg 和 FFprobe，不需要另外安装 Node.js、Python、FFmpeg 或本地模型。
+- 文件大小：约 206 MiB。
+- SHA-256：`44A01E44D3FADEFA89B777F263BB7240F41C8C128CC2EB698A518DE42436B85D`
+
+当前安装包尚未进行代码签名。Windows SmartScreen 可能显示“未知发布者”；请先核对上面的 SHA-256，确认一致后再选择“更多信息”与“仍要运行”。
+
+在 PowerShell 中校验下载文件：
+
+```powershell
+Get-FileHash -LiteralPath '.\声织笔记 Setup 0.2.17.exe' -Algorithm SHA256
+```
+
+## 第一次使用
+
+1. 打开软件。首次启动时右侧“连接设置”会自动展开。
+2. 在“语音识别 ASR”中选择供应商，填写该服务商控制台提供的 Base URL、API Key 和模型名。
+3. 在“文本排版模型”中选择供应商，再填写对应的 Base URL、API Key 和模型名。ASR 与文本排版是两套独立设置，不能只配置其中一套。
+4. “刷新”会尝试读取当前接口实际开放的模型；如果供应商不提供模型列表接口，可以直接填写控制台中已经开通的模型名。
+5. 点击“保存设置”。连接信息完整后，设置面板会自动收起，顶部显示“连接已就绪”。
+6. 点击“添加文件”，或把音视频直接拖入窗口。软件会先检测文件是否包含可识别的音轨。
+7. 在“2. 选择渲染方式”中选择直播复盘、访谈、会议、课程笔记等模板，并检查下方 Prompt 是否符合本次任务。
+8. 点击“3. 开始转录”。多个文件会严格按队列顺序逐个处理；点击“暂停”会取消当前处理并暂停队列，点击“继续转录”后会从该任务重新开始。
+9. 任务完成后，在队列中选中任务，在“输出预览”中检查或修改内容，再点击“保存 Markdown”选择保存位置。
+
+处理失败时，点击窗口顶部的“处理日志”。日志会显示文件名、大小、处理阶段、耗时、模型和错误原因。中间音频与原始文字稿默认保存在用户“文档 / 声织笔记”目录中。
+
 ## 核心流程
 
 ```mermaid
@@ -161,10 +192,6 @@ resources/
   ffmpeg/                本地构建时放置 FFmpeg/FFprobe
 scripts/
   check.js               源码与发布前检查
-docs/
-  OBSIDIAN_WORKFLOW.md    知识库工作流建议
-  RELEASE_TEMPLATE.md    GitHub Release 文案
-  GITHUB_SUBMISSION.md   公开提交与比赛展示清单
 ```
 
 ## 验证
@@ -173,22 +200,12 @@ docs/
 - `npm run check:release`：在源码检查基础上确认图标、FFmpeg 和 FFprobe 已就绪。
 - GitHub Actions 会在 push 和 pull request 时运行源码检查。
 
-## Obsidian 工作流
-
-推荐先把生成文档保存到 Vault 的 Inbox，再补充标签、双链、来源和个人思考。完整建议见 [docs/OBSIDIAN_WORKFLOW.md](docs/OBSIDIAN_WORKFLOW.md)。
-
-## 发布与黑客松展示
-
-- GitHub 提交和隐私检查：[docs/GITHUB_SUBMISSION.md](docs/GITHUB_SUBMISSION.md)
-- Release 文案：[docs/RELEASE_TEMPLATE.md](docs/RELEASE_TEMPLATE.md)
-- 项目介绍素材：[docs/LAUNCH_KIT.md](docs/LAUNCH_KIT.md)
-
 ## 当前限制
 
 - 当前主要面向 Windows。
 - 需要用户自行提供 ASR 与文本模型 API。
 - 实际费用、速率和数据处理方式由 API 服务商决定。
-- 仓库不提供 FFmpeg 二进制和安装包，成品请通过 Releases 分发。
+- 源码仓库不保存 FFmpeg 二进制和安装包；Windows 成品通过 GitHub Releases 分发。
 
 ## License
 
