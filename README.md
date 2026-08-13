@@ -38,7 +38,7 @@
 在 PowerShell 中校验下载文件：
 
 ```powershell
-Get-FileHash -LiteralPath '.\声织笔记 Setup 0.2.17.exe' -Algorithm SHA256
+Get-FileHash -LiteralPath '.\Setup.0.2.17.exe' -Algorithm SHA256
 ```
 
 ## 第一次使用
