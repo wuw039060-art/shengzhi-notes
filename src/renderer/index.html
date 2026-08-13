@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>声织笔记</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main id="appShell" class="app-shell">
+      <section class="workspace">
+        <header class="topbar">
+          <div>
+            <h1>声织笔记</h1>
+            <p>把音视频沉淀为可编辑、可保存的 Markdown 知识资产</p>
+          </div>
+          <div class="topbar-actions">
+            <button id="settingsToggle" class="quiet-button" title="打开模型设置">设置</button>
+            <button id="logsToggle" class="quiet-button" title="查看失败处理日志">处理日志</button>
+            <button id="helpToggle" class="quiet-button" title="打开使用指南">帮助</button>
+          </div>
+        </header>
+
+        <section class="main-grid">
+          <div class="left-rail" aria-label="渲染面板">
+            <section id="connectionStrip" class="connection-strip">
+              <div>
+                <strong id="connectionTitle">检查连接设置</strong>
+                <span id="connectionDetail">首次使用需要配置 ASR 和文本排版模型。</span>
+              </div>
+              <button id="openSettingsInline">调整</button>
+            </section>
+
+            <section id="dropZone" class="drop-zone">
+              <div class="drop-copy">
+                <span class="drop-icon">声</span>
+                <div>
+                  <strong>1. 添加音视频</strong>
+                  <p id="dropHint">把文件拖到这里，松手即可加入</p>
+                  <small>支持 70+ 种常见音视频格式，并自动检测音轨</small>
+                </div>
+              </div>
+              <div class="drop-actions">
+                <input id="fileInput" type="text" readonly placeholder="尚未选择文件" />
+                <button id="selectFile">添加文件</button>
+              </div>
+              <div id="dropFeedback" class="drop-feedback" aria-live="polite"></div>
+            </section>
+
+            <section class="prompt-panel">
+              <div class="prompt-header">
+                <label for="promptInput">2. 选择渲染方式</label>
+                <select id="promptTemplate">
+                  <option value="liveReview">直播复盘</option>
+                  <option value="interview">访谈</option>
+                  <option value="speech">演讲稿</option>
+                  <option value="blog">博客/文章</option>
+                  <option value="podcast">播客</option>
+                  <option value="launch">发布会</option>
+                  <option value="meeting">会议</option>
+                  <option value="course">课程笔记</option>
+                  <option value="custom">自定义 Prompt</option>
+                </select>
+              </div>
+              <textarea id="promptInput" rows="8"></textarea>
+              <div class="prompt-runtime">
+                <div>
+                  <strong>本次 Prompt</strong>
+                  <span>随任务锁定</span>
+                </div>
+                <pre id="activePromptPreview">尚未开始任务。</pre>
+              </div>
+              <div class="actions run-actions">
+                <div class="run-buttons">
+                  <button id="startJob" class="primary">3. 开始转录</button>
+                  <button id="pauseJob" class="pause-button" disabled>暂停</button>
+                </div>
+                <span id="statusText">等待添加文件</span>
+              </div>
+            </section>
+
+            <section class="steps" aria-label="处理步骤">
+              <div class="step" data-stage="converted">
+                <strong>1</strong>
+                <span>音频准备</span>
+              </div>
+              <div class="step" data-stage="transcribed">
+                <strong>2</strong>
+                <span>语音识别</span>
+              </div>
+              <div class="step" data-stage="completed">
+                <strong>3</strong>
+                <span>Markdown 排版</span>
+              </div>
+            </section>
+          </div>
+
+          <div class="right-rail" aria-label="队列和输出">
+            <section class="queue-panel">
+              <div class="panel-title">
+                <div>
+                  <h2>任务队列</h2>
+                  <p class="panel-subtitle">当前文件、进度和结果状态。</p>
+                </div>
+                <span class="serial-badge">按顺序逐个处理</span>
+              </div>
+              <div id="queueList" class="queue-list empty">还没有任务。请添加文件，或把文件拖入窗口。</div>
+            </section>
+
+            <section class="result-panel">
+              <div class="panel-title">
+                <div>
+                  <h2>输出预览</h2>
+                  <p id="previewTitle" class="panel-subtitle">选择队列中的任务查看结果。</p>
+                </div>
+                <div class="result-actions">
+                  <button id="saveOutput" disabled>保存 Markdown</button>
+                  <button id="revealOutput" disabled>打开位置</button>
+                </div>
+              </div>
+              <textarea id="preview" spellcheck="false" placeholder="任务完成后，Markdown 会显示在这里。你可以先检查和微调内容，再选择保存位置。"></textarea>
+            </section>
+          </div>
+        </section>
+      </section>
+
+      <aside id="settingsPanel" class="settings-panel hidden">
+        <div class="panel-title">
+          <div>
+            <h2>连接设置</h2>
+            <p class="panel-subtitle">设置一次即可，之后会自动收起。</p>
+          </div>
+          <button id="closeSettings" title="关闭">×</button>
+        </div>
+
+        <div class="setting-group">
+          <label for="mediaOutputFormat">中间音频格式</label>
+          <select id="mediaOutputFormat">
+            <option value="wav">WAV 16kHz mono，识别优先</option>
+            <option value="mp3">MP3，体积更小</option>
+          </select>
+        </div>
+
+        <div class="setting-section">
+          <h3>语音识别 ASR</h3>
+
+          <div class="setting-group">
+            <label for="asrProvider">ASR 供应商</label>
+            <select id="asrProvider">
+              <option value="openai-transcriptions-compatible">OpenAI 语音转写</option>
+              <option value="mimo-asr">小米 MiMo ASR</option>
+              <option value="doubao-asr">豆包 / 火山引擎 ASR</option>
+              <option value="xfyun-lfasr">讯飞听见长音频转写</option>
+              <option value="openai-chat-audio-compatible">OpenAI Chat 音频输入兼容</option>
+              <option value="anthropic-compatible">Anthropic Messages 兼容实验</option>
+              <option value="custom-asr">自定义 OpenAI-compatible ASR</option>
+            </select>
+          </div>
+
+          <div class="setting-group">
+            <label for="asrBaseUrl">ASR Base URL</label>
+            <input id="asrBaseUrl" type="text" />
+            <small id="asrBaseUrlHint"></small>
+          </div>
+
+          <div class="setting-group">
+            <label for="asrApiKey">ASR API Key / 密钥</label>
+            <input id="asrApiKey" type="password" />
+          </div>
+
+          <div class="setting-group">
+            <label for="asrModelSelect">ASR 模型</label>
+            <div class="model-row">
+              <select id="asrModelSelect"></select>
+              <button id="refreshAsrModels" title="根据 ASR 协议识别模型">刷新</button>
+            </div>
+            <input id="asrModel" type="text" placeholder="也可以手动输入 ASR 模型名" />
+            <small id="asrModelHint">选择协议后会填入推荐地址和模型；点击刷新可尝试读取模型列表。</small>
+          </div>
+        </div>
+
+        <div class="setting-section">
+          <h3>文本排版模型</h3>
+
+          <div class="setting-group">
+            <label for="llmProvider">文本排版模型供应商</label>
+            <select id="llmProvider">
+              <option value="openai">OpenAI</option>
+              <option value="deepseek">DeepSeek</option>
+              <option value="tongyi">通义千问兼容模式</option>
+              <option value="doubao">豆包 Ark 兼容模式</option>
+              <option value="anthropic">Anthropic Claude</option>
+              <option value="custom">自定义 OpenAI-compatible 网关</option>
+            </select>
+          </div>
+
+          <div class="setting-group">
+            <label for="llmBaseUrl">文本排版模型 Base URL</label>
+            <input id="llmBaseUrl" type="text" />
+          </div>
+
+          <div class="setting-group">
+            <label for="llmApiKey">文本排版模型 API Key</label>
+            <input id="llmApiKey" type="password" />
+          </div>
+
+          <div class="setting-group">
+            <label for="llmModelSelect">文本排版模型</label>
+            <div class="model-row">
+              <select id="llmModelSelect"></select>
+              <button id="refreshModels" title="根据 Base URL 和 API Key 获取模型列表">刷新</button>
+            </div>
+            <input id="llmModel" type="text" placeholder="也可以手动输入模型名" />
+            <small id="modelHint">选择供应商后会填入推荐模型和 Base URL；点击刷新可从接口读取可用模型。</small>
+          </div>
+        </div>
+
+        <button id="saveSettings" class="primary">保存设置</button>
+      </aside>
+    </main>
+
+    <div id="helpModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="helpTitle">
+      <div class="modal-content">
+        <div class="panel-title">
+          <h2 id="helpTitle">使用指南</h2>
+          <button id="closeHelp" title="关闭">×</button>
+        </div>
+        <article id="helpBody" class="help-body"></article>
+      </div>
+    </div>
+
+    <div id="logsModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="logsTitle">
+      <div class="modal-content logs-modal-content">
+        <div class="panel-title">
+          <div>
+            <h2 id="logsTitle">处理日志</h2>
+            <p id="logsSubtitle" class="panel-subtitle">任务失败时会自动记录文件、阶段、耗时和错误原因。</p>
+          </div>
+          <div class="modal-actions">
+            <button id="revealLogs">打开日志文件</button>
+            <button id="clearLogs">清空</button>
+            <button id="closeLogs" title="关闭">×</button>
+          </div>
+        </div>
+        <div id="logsBody" class="logs-body"></div>
+      </div>
+    </div>
+
+    <div id="queueContextMenu" class="queue-context-menu hidden">
+      <button id="contextRemove">移除</button>
+    </div>
+
+    <script src="./renderer.js"></script>
+  </body>
+</html>
